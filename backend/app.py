@@ -3,6 +3,7 @@ from flask_cors import CORS
 import sqlite3
 import os
 import json
+from datetime import datetime
 
 app = Flask(__name__, static_folder='static')
 CORS(app)
@@ -81,7 +82,7 @@ def save_settings(settings):
 def get_data():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, title, content FROM documents")
+    cursor.execute("SELECT id, title, content FROM documents ORDER BY id DESC")
     docs = cursor.fetchall()
     conn.close()
     
@@ -99,7 +100,7 @@ def get_data():
 def get_documents():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, title, content FROM documents")
+    cursor.execute("SELECT id, title, content FROM documents ORDER BY id DESC")
     docs = cursor.fetchall()
     conn.close()
     
@@ -122,12 +123,13 @@ def add_document():
     doc_id = doc_data.get('id', str(int(os.times()[4])))
     title = doc_data.get('title', f'文档{doc_id}')
     content = json.dumps(doc_data['content'], ensure_ascii=False)
+    created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO documents (id, title, content) VALUES (?, ?, ?)",
-        (doc_id, title, content)
+        "INSERT INTO documents (id, title, content, created_at) VALUES (?, ?, ?, ?)",
+        (doc_id, title, content, created_at)
     )
     conn.commit()
     conn.close()

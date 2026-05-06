@@ -16,7 +16,10 @@ function App() {
       fetch('/api/data/documents').then(r => r.json()),
       fetch('/api/data/settings').then(r => r.json())
     ]).then(([docsData, settingsData]) => {
-      setDocs(Array.isArray(docsData) ? docsData : [])
+      const sortedDocs = Array.isArray(docsData) 
+        ? [...docsData].sort((a, b) => b.id.localeCompare(a.id)) 
+        : []
+      setDocs(sortedDocs)
       setSettings(settingsData)
     })
   }, [])
