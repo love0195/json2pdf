@@ -447,9 +447,21 @@ body {
 }
 
 @media print {
+  @page {
+    margin: 0 !important;
+    size: A4;
+  }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
   .app {
     background: white !important;
     padding: 0 !important;
+    margin: 0 !important;
   }
 
   .header, .tabs, .editor-container, .bottom-nav, .import-section, .preview-container {
@@ -458,19 +470,17 @@ body {
 
   .main-content {
     padding: 0 !important;
+    margin: 0 !important;
   }
 
   .print-only {
     display: block !important;
-    padding: 20mm !important;
+    padding: 10mm 15mm !important;
     margin: 0 !important;
   }
 
   .Print-title {
-    font-size: 24pt !important;
-    text-align: center !important;
-    margin-bottom: 20mm !important;
-    font-weight: bold !important;
+    display: none !important;
   }
 
   .Print-body {
@@ -479,31 +489,27 @@ body {
 
   .print-line {
     text-align: center !important;
-    margin: 8px 0 !important;
+    margin: 6px 0 !important;
     page-break-inside: avoid !important;
   }
 
   .print-char-wrapper {
     display: inline-block !important;
-    margin: 0 6px !important;
+    margin: 0 5px !important;
     text-align: center !important;
     vertical-align: top !important;
   }
 
   .print-pinyin {
-    font-size: 11pt !important;
+    font-size: 10pt !important;
     color: #666 !important;
     display: block !important;
     text-align: center !important;
   }
 
   .print-hanzi {
-    font-size: 18pt !important;
+    font-size: 16pt !important;
     display: block !important;
     text-align: center !important;
-  }
-
-  body {
-    background: white !important;
   }
 }
