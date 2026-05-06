@@ -77,7 +77,7 @@ function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newDoc)
     }).then(() => {
-      setDocs(prev => [...prev, newDoc])
+      setDocs(prev => [newDoc, ...prev])
       setCurrentDoc(newDoc)
       setView('preview')
     })
