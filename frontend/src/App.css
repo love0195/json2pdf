@@ -143,9 +143,8 @@ body {
 }
 
 .hz {
-    font-size: 24px;
-    display: block;
-  }
+  font-size: 24px;
+  display: block;
 }
 
 .modal-overlay {
@@ -299,14 +298,14 @@ body {
   }
 
   .print-char {
-    margin: 0 3px !important;
+    margin: 0 4px !important;
   }
 
   .py {
-    font-size: 9pt !important;
+    font-size: 12pt !important;
   }
 
   .hz {
-    font-size: 14pt !important;
+    font-size: 20pt !important;
   }
 }
