@@ -5,7 +5,7 @@ import './App.css'
 function App() {
   const [data, setData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [fontSize, setFontSize] = useState(24)
+  const [fontSize, setFontSize] = useState(28)
   const [activeTab, setActiveTab] = useState('preview')
 
   useEffect(() => {
@@ -30,12 +30,12 @@ function App() {
     let cursorY = 40
 
     pdf.setFont("SimSun")
-    pdf.setFontSize(fontSize)
+    pdf.setFontSize(fontSize - 4)
 
     data.content.forEach((line) => {
       let totalWidth = 0
       line.forEach(([char]) => totalWidth += pdf.getTextWidth(char))
-      
+
       let cursorX = (pageW - totalWidth) / 2
 
       if (cursorY > pageH - 30) {
@@ -44,9 +44,9 @@ function App() {
       }
 
       line.forEach(([char, py]) => {
-        pdf.setFontSize(fontSize - 4)
+        pdf.setFontSize(fontSize - 8)
         pdf.text(py, cursorX, cursorY - 5)
-        pdf.setFontSize(fontSize)
+        pdf.setFontSize(fontSize - 4)
         pdf.text(char, cursorX, cursorY + 5)
         cursorX += pdf.getTextWidth(char)
       })
@@ -74,18 +74,18 @@ function App() {
         <h1>{data.title}</h1>
         <div className="controls">
           <div className="font-size-control">
-            <label>字体大小:</label>
+            <label>字号:</label>
             <input
               type="range"
-              min="12"
+              min="16"
               max="48"
               value={fontSize}
               onChange={handleFontSizeChange}
             />
-            <span>{fontSize}px</span>
+            <span>{fontSize}</span>
           </div>
           <button className="export-btn" onClick={exportVectorPdf}>
-            导出 PDF
+            PDF
           </button>
         </div>
       </header>
@@ -95,13 +95,13 @@ function App() {
           className={`tab-btn ${activeTab === 'preview' ? 'active' : ''}`}
           onClick={() => setActiveTab('preview')}
         >
-          A4 预览
+          预览
         </button>
         <button
           className={`tab-btn ${activeTab === 'editor' ? 'active' : ''}`}
           onClick={() => setActiveTab('editor')}
         >
-          编辑内容
+          编辑
         </button>
       </div>
 
@@ -110,12 +110,14 @@ function App() {
           <div className="preview-container">
             {data.content.map((line, lineIndex) => (
               <div key={lineIndex} className="page">
-                <div className="line">
+                <div className="line" style={{ fontSize: `${fontSize}px` }}>
                   {line.map(([char, py], charIndex) => (
-                    <ruby key={charIndex}>
-                      <span className="char">{char}</span>
-                      <rt className="pinyin">{py}</rt>
-                    </ruby>
+                    <span key={charIndex} className="char-wrapper">
+                      <ruby>
+                        <span className="char">{char}</span>
+                        <rt className="pinyin">{py}</rt>
+                      </ruby>
+                    </span>
                   ))}
                 </div>
               </div>
@@ -125,37 +127,46 @@ function App() {
 
         {activeTab === 'editor' && (
           <div className="editor-container">
-            <div className="editor-content">
-              {data.content.map((line, lineIndex) => (
-                <div key={lineIndex} className="editor-line">
-                  {line.map(([char, py], charIndex) => (
-                    <div key={charIndex} className="char-input-group">
-                      <input
-                        type="text"
-                        className="char-input"
-                        value={char}
-                        maxLength={1}
-                      />
-                      <input
-                        type="text"
-                        className="pinyin-input"
-                        value={py}
-                      />
-                    </div>
-                  ))}
-                  <button className="add-char-btn">+</button>
-                  <button className="delete-line-btn" onClick={() => handleDeleteLine(lineIndex)}>
-                    删除
-                  </button>
-                </div>
-              ))}
-              <button className="add-line-btn" onClick={handleAddLine}>
-                添加行
-              </button>
-            </div>
+            {data.content.map((line, lineIndex) => (
+              <div key={lineIndex} className="editor-line">
+                {line.map(([char, py], charIndex) => (
+                  <div key={charIndex} className="char-input-group">
+                    <input
+                      type="text"
+                      className="char-input"
+                      value={char}
+                      maxLength={1}
+                    />
+                    <input
+                      type="text"
+                      className="pinyin-input"
+                      value={py}
+                    />
+                  </div>
+                ))}
+                <button className="add-char-btn">+</button>
+                <button className="delete-line-btn" onClick={() => handleDeleteLine(lineIndex)}>
+                  删除
+                </button>
+              </div>
+            ))}
+            <button className="add-line-btn" onClick={handleAddLine}>
+              + 添加新行
+            </button>
           </div>
         )}
       </main>
+
+      <nav className="bottom-nav">
+        <button className={`nav-item ${activeTab === 'preview' ? 'active' : ''}`} onClick={() => setActiveTab('preview')}>
+          <span className="nav-icon">📖</span>
+          <span>预览</span>
+        </button>
+        <button className={`nav-item ${activeTab === 'editor' ? 'active' : ''}`} onClick={() => setActiveTab('editor')}>
+          <span className="nav-icon">✏️</span>
+          <span>编辑</span>
+        </button>
+      </nav>
     </div>
   )
 
