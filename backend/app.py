@@ -1,7 +1,9 @@
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, make_response
 from flask_cors import CORS
 import json
 import os
+import subprocess
+import tempfile
 
 app = Flask(__name__, static_folder='static')
 CORS(app)
@@ -76,6 +78,104 @@ def import_data():
             return jsonify({"status": "error", "message": str(e)}), 500
     
     return jsonify({"status": "error", "message": "只支持JSON文件"}), 400
+
+@app.route('/api/pdf', methods=['POST'])
+def generate_pdf():
+    data = request.get_json()
+    if not data or 'content' not in data:
+        return jsonify({"status": "error", "message": "没有数据"}), 400
+
+    font_size = data.get('fontSize', 24)
+
+    html_content = f'''<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@page {{ size: A4; margin: 20mm; }}
+body {{ 
+    font-family: "SimSun", "Microsoft YaHei", sans-serif; 
+    font-size: {font_size}px;
+    line-height: 2;
+}}
+.line {{ 
+    text-align: center; 
+    margin: 10px 0;
+    page-break-inside: avoid;
+}}
+ruby {{
+    display: inline-block;
+    margin: 0 4px;
+}}
+rt {{ 
+    font-size: 12px; 
+    color: #666;
+    text-align: center;
+}}
+.char {{
+    display: block;
+    text-align: center;
+}}
+</style>
+</head>
+<body>
+'''
+    for line in data['content']:
+        html_content += '<div class="line">'
+        for char, py in line:
+            html_content += f'<ruby><span class="char">{char}</span><rt>{py}</rt></ruby>'
+        html_content += '</div>\n'
+    
+    html_content += '</body></html>'
+
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.html', encoding='utf-8', delete=False) as f:
+        f.write(html_content)
+        html_path = f.name
+
+    pdf_path = html_path.replace('.html', '.pdf')
+
+    try:
+        if os.path.exists('/usr/bin/chromium') or os.path.exists('/usr/bin/google-chrome'):
+            browser = 'chromium' if os.path.exists('/usr/bin/chromium') else 'google-chrome'
+            cmd = [
+                browser,
+                '--headless',
+                '--no-sandbox',
+                '--disable-gpu',
+                f'--print-to-pdf={pdf_path}',
+                html_path
+            ]
+        elif os.path.exists('/usr/bin/wkhtmltopdf'):
+            cmd = ['wkhtmltopdf', '--page-size', 'A4', '--margin-top', '20mm', '--margin-bottom', '20mm', html_path, pdf_path]
+        else:
+            return jsonify({"status": "error", "message": "没有可用的PDF生成工具"}), 500
+
+        result = subprocess.run(cmd, capture_output=True, timeout=30)
+
+        if os.path.exists(pdf_path):
+            with open(pdf_path, 'rb') as f:
+                pdf_data = f.read()
+
+            os.unlink(html_path)
+            os.unlink(pdf_path)
+
+            response = make_response(pdf_data)
+            response.headers['Content-Type'] = 'application/pdf'
+            filename = data.get('title', 'pinyin')
+            response.headers['Content-Disposition'] = f'attachment; filename="{filename}.pdf"'
+            return response
+        else:
+            return jsonify({"status": "error", "message": "PDF生成失败"}), 500
+
+    except subprocess.TimeoutExpired:
+        return jsonify({"status": "error", "message": "PDF生成超时"}), 500
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        if os.path.exists(html_path):
+            os.unlink(html_path)
+        if os.path.exists(pdf_path):
+            os.unlink(pdf_path)
 
 @app.route('/api/data/title', methods=['PUT'])
 def update_title():

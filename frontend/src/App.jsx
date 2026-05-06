@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import { jsPDF } from 'jspdf'
 import './App.css'
 
 function App() {
@@ -22,58 +21,9 @@ function App() {
       })
   }, [])
 
-  const exportVectorPdf = () => {
+  const exportPdf = () => {
     if (!data) return
-
-    try {
-      const pdf = new jsPDF({ unit: 'mm', format: 'a4' })
-      const pageW = 210, pageH = 297
-      const lineHeight = 12
-      let cursorY = 35
-
-      pdf.setFont("helvetica")
-
-      data.content.forEach((line, lineIndex) => {
-        let lineText = line.map(([char, py]) => `${py} ${char}`).join(' ')
-
-        if (line.length === 0) {
-          cursorY += lineHeight
-          return
-        }
-
-        let charY = cursorY
-        let pinyinY = cursorY - 5
-        let cursorX = 20
-
-        line.forEach(([char, py], charIndex) => {
-          if (charIndex > 0) {
-            cursorX += 15
-          }
-
-          pdf.setFontSize(fontSize - 6)
-          pdf.setTextColor(100, 100, 100)
-          pdf.text(py, cursorX, pinyinY)
-
-          pdf.setFontSize(fontSize - 2)
-          pdf.setTextColor(0, 0, 0)
-          pdf.text(char, cursorX, charY)
-
-          cursorX += pdf.getTextWidth(char) * 0.8
-        })
-
-        cursorY += lineHeight
-
-        if (cursorY > pageH - 25) {
-          pdf.addPage()
-          cursorY = 35
-        }
-      })
-
-      pdf.save(`${data.title || 'pinyin'}.pdf`)
-    } catch (error) {
-      console.error('PDF export error:', error)
-      alert('PDF导出失败，请重试')
-    }
+    window.print()
   }
 
   const handleImportJson = (event) => {
@@ -132,7 +82,7 @@ function App() {
             />
             <span>{fontSize}</span>
           </div>
-          <button className="export-btn" onClick={exportVectorPdf}>
+          <button className="export-btn" onClick={exportPdf}>
             PDF
           </button>
         </div>
@@ -228,6 +178,21 @@ function App() {
           <span>编辑</span>
         </button>
       </nav>
+
+      <div className="print-content" style={{ display: 'none' }}>
+        {data.content.map((line, lineIndex) => (
+          <div key={lineIndex} className="print-page">
+            <div className="print-line" style={{ fontSize: `${fontSize}px` }}>
+              {line.map(([char, py], charIndex) => (
+                <span key={charIndex} className="print-char-wrapper">
+                  <span className="print-pinyin">{py}</span>
+                  <span className="print-hanzi">{char}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 

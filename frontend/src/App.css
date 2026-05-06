@@ -447,20 +447,70 @@ body {
 }
 
 @media print {
-  .header, .tabs, .editor-container, .bottom-nav {
-    display: none;
-  }
-
-  .page {
-    box-shadow: none;
-    margin: 0;
-    width: 100%;
-    height: auto;
-    min-height: auto;
-    border-radius: 0;
-  }
-
   .app {
-    background: white;
+    background: white !important;
+    padding: 0 !important;
+  }
+
+  .header, .tabs, .editor-container, .bottom-nav, .import-section {
+    display: none !important;
+  }
+
+  .main-content {
+    padding: 0 !important;
+  }
+
+  .preview-container {
+    display: none !important;
+  }
+
+  .print-content {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .print-page {
+    width: 100% !important;
+    min-height: auto !important;
+    padding: 15mm !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    page-break-after: always !important;
+    background: white !important;
+  }
+
+  .print-page:last-child {
+    page-break-after: auto !important;
+  }
+
+  .print-line {
+    text-align: center !important;
+    margin: 10px 0 !important;
+    page-break-inside: avoid !important;
+  }
+
+  .print-char-wrapper {
+    display: inline-block !important;
+    margin: 0 4px !important;
+    text-align: center !important;
+  }
+
+  .print-pinyin {
+    font-size: 10pt !important;
+    color: #666 !important;
+    display: block !important;
+    text-align: center !important;
+  }
+
+  .print-hanzi {
+    font-size: 16pt !important;
+    display: block !important;
+    text-align: center !important;
+  }
+
+  body {
+    background: white !important;
   }
 }
