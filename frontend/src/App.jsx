@@ -179,10 +179,11 @@ function App() {
         </button>
       </nav>
 
-      <div className="print-content" style={{ display: 'none' }}>
-        {data.content.map((line, lineIndex) => (
-          <div key={lineIndex} className="print-page">
-            <div className="print-line" style={{ fontSize: `${fontSize}px` }}>
+      <div className="print-only">
+        <div className="print-title">{data.title}</div>
+        <div className="print-body">
+          {data.content.map((line, lineIndex) => (
+            <div key={lineIndex} className="print-line">
               {line.map(([char, py], charIndex) => (
                 <span key={charIndex} className="print-char-wrapper">
                   <span className="print-pinyin">{py}</span>
@@ -190,8 +191,8 @@ function App() {
                 </span>
               ))}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   )

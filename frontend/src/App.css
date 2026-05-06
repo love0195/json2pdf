@@ -452,7 +452,7 @@ body {
     padding: 0 !important;
   }
 
-  .header, .tabs, .editor-container, .bottom-nav, .import-section {
+  .header, .tabs, .editor-container, .bottom-nav, .import-section, .preview-container {
     display: none !important;
   }
 
@@ -460,52 +460,45 @@ body {
     padding: 0 !important;
   }
 
-  .preview-container {
-    display: none !important;
-  }
-
-  .print-content {
+  .print-only {
     display: block !important;
-    padding: 0 !important;
+    padding: 20mm !important;
     margin: 0 !important;
   }
 
-  .print-page {
+  .Print-title {
+    font-size: 24pt !important;
+    text-align: center !important;
+    margin-bottom: 20mm !important;
+    font-weight: bold !important;
+  }
+
+  .Print-body {
     width: 100% !important;
-    min-height: auto !important;
-    padding: 15mm !important;
-    margin: 0 !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    page-break-after: always !important;
-    background: white !important;
-  }
-
-  .print-page:last-child {
-    page-break-after: auto !important;
   }
 
   .print-line {
     text-align: center !important;
-    margin: 10px 0 !important;
+    margin: 8px 0 !important;
     page-break-inside: avoid !important;
   }
 
   .print-char-wrapper {
     display: inline-block !important;
-    margin: 0 4px !important;
+    margin: 0 6px !important;
     text-align: center !important;
+    vertical-align: top !important;
   }
 
   .print-pinyin {
-    font-size: 10pt !important;
+    font-size: 11pt !important;
     color: #666 !important;
     display: block !important;
     text-align: center !important;
   }
 
   .print-hanzi {
-    font-size: 16pt !important;
+    font-size: 18pt !important;
     display: block !important;
     text-align: center !important;
   }
