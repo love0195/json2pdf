@@ -77,7 +77,7 @@ function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newDoc)
     }).then(() => {
-      setDocs(prev => [...prev, newDoc])
+      setDocs(prev => [newDoc, ...prev])
       setCurrentDoc(newDoc)
       setView('preview')
     })
@@ -100,6 +100,9 @@ function App() {
         }
         .hz {
           font-size: ${settings.fontSize}pt !important;
+        }
+        .doc-title {
+          font-size: ${settings.fontSize + 2}pt !important;
         }
       }
     `
@@ -225,6 +228,9 @@ function App() {
 
       <main className="preview-area">
         <div className="preview-content">
+          <h2 className="doc-title">{currentDoc.title.split('-').map((line, i) => (
+            <span key={i} className="doc-title-line">{line}</span>
+          ))}</h2>
           {currentDoc.content.map((line, i) => (
             <div key={i} className="print-line">
               {line.map(([c, p], j) => (
