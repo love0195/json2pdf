@@ -145,6 +145,13 @@ body {
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
+.doc-title {
+  text-align: center;
+  margin-bottom: 24px;
+  color: #333;
+  font-weight: bold;
+}
+
 .print-line {
   text-align: center;
   margin: 8px 0;
@@ -325,6 +332,14 @@ body {
     box-shadow: none !important;
     border-radius: 0 !important;
     padding: 0 !important;
+  }
+
+  .doc-title {
+    text-align: center !important;
+    margin-bottom: 20px !important;
+    font-weight: bold !important;
+    color: #000 !important;
+    page-break-after: avoid !important;
   }
 
   .print-line {

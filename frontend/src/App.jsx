@@ -101,6 +101,9 @@ function App() {
         .hz {
           font-size: ${settings.fontSize}pt !important;
         }
+        .doc-title {
+          font-size: ${settings.fontSize + 2}pt !important;
+        }
       }
     `
     document.head.appendChild(style)
@@ -225,6 +228,7 @@ function App() {
 
       <main className="preview-area">
         <div className="preview-content">
+          <h2 className="doc-title">{currentDoc.title}</h2>
           {currentDoc.content.map((line, i) => (
             <div key={i} className="print-line">
               {line.map(([c, p], j) => (
