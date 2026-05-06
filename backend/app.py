@@ -51,6 +51,32 @@ def update_data():
     save_data(new_data)
     return jsonify({"status": "success"})
 
+@app.route('/api/data/import', methods=['POST'])
+def import_data():
+    if 'file' not in request.files:
+        return jsonify({"status": "error", "message": "没有文件"}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"status": "error", "message": "文件名为空"}), 400
+    
+    if file and file.filename.endswith('.json'):
+        try:
+            content = file.read()
+            new_data = json.loads(content.decode('utf-8'))
+            
+            if 'content' not in new_data:
+                return jsonify({"status": "error", "message": "JSON格式错误，需要content字段"}), 400
+            
+            save_data(new_data)
+            return jsonify({"status": "success", "data": new_data})
+        except json.JSONDecodeError:
+            return jsonify({"status": "error", "message": "JSON解析失败"}), 400
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 500
+    
+    return jsonify({"status": "error", "message": "只支持JSON文件"}), 400
+
 @app.route('/api/data/title', methods=['PUT'])
 def update_title():
     data = load_data()

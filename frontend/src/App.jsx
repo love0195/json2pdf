@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { jsPDF } from 'jspdf'
 import './App.css'
 
@@ -7,6 +7,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [fontSize, setFontSize] = useState(28)
   const [activeTab, setActiveTab] = useState('preview')
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     fetch('/api/data')
@@ -24,36 +25,83 @@ function App() {
   const exportVectorPdf = () => {
     if (!data) return
 
-    const pdf = new jsPDF({ unit: 'mm', format: 'a4' })
-    const pageW = 210, pageH = 297
-    const lineHeight = 15
-    let cursorY = 40
+    try {
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4' })
+      const pageW = 210, pageH = 297
+      const lineHeight = 12
+      let cursorY = 35
 
-    pdf.setFont("SimSun")
-    pdf.setFontSize(fontSize - 4)
+      pdf.setFont("helvetica")
 
-    data.content.forEach((line) => {
-      let totalWidth = 0
-      line.forEach(([char]) => totalWidth += pdf.getTextWidth(char))
+      data.content.forEach((line, lineIndex) => {
+        let lineText = line.map(([char, py]) => `${py} ${char}`).join(' ')
 
-      let cursorX = (pageW - totalWidth) / 2
+        if (line.length === 0) {
+          cursorY += lineHeight
+          return
+        }
 
-      if (cursorY > pageH - 30) {
-        pdf.addPage()
-        cursorY = 30
-      }
+        let charY = cursorY
+        let pinyinY = cursorY - 5
+        let cursorX = 20
 
-      line.forEach(([char, py]) => {
-        pdf.setFontSize(fontSize - 8)
-        pdf.text(py, cursorX, cursorY - 5)
-        pdf.setFontSize(fontSize - 4)
-        pdf.text(char, cursorX, cursorY + 5)
-        cursorX += pdf.getTextWidth(char)
+        line.forEach(([char, py], charIndex) => {
+          if (charIndex > 0) {
+            cursorX += 15
+          }
+
+          pdf.setFontSize(fontSize - 6)
+          pdf.setTextColor(100, 100, 100)
+          pdf.text(py, cursorX, pinyinY)
+
+          pdf.setFontSize(fontSize - 2)
+          pdf.setTextColor(0, 0, 0)
+          pdf.text(char, cursorX, charY)
+
+          cursorX += pdf.getTextWidth(char) * 0.8
+        })
+
+        cursorY += lineHeight
+
+        if (cursorY > pageH - 25) {
+          pdf.addPage()
+          cursorY = 35
+        }
       })
-      cursorY += lineHeight
+
+      pdf.save(`${data.title || 'pinyin'}.pdf`)
+    } catch (error) {
+      console.error('PDF export error:', error)
+      alert('PDF导出失败，请重试')
+    }
+  }
+
+  const handleImportJson = (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    fetch('/api/data/import', {
+      method: 'POST',
+      body: formData
+    })
+    .then(res => res.json())
+    .then(result => {
+      if (result.status === 'success') {
+        setData(result.data)
+        alert('导入成功！')
+      } else {
+        alert(result.message || '导入失败')
+      }
+    })
+    .catch(err => {
+      console.error('Import error:', err)
+      alert('导入失败，请重试')
     })
 
-    pdf.save(`${data.title || 'output'}.pdf`)
+    event.target.value = ''
   }
 
   const handleFontSizeChange = (e) => {
@@ -127,6 +175,19 @@ function App() {
 
         {activeTab === 'editor' && (
           <div className="editor-container">
+            <div className="import-section">
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept=".json"
+                onChange={handleImportJson}
+                style={{ display: 'none' }}
+              />
+              <button className="import-btn" onClick={() => fileInputRef.current.click()}>
+                📂 导入JSON文件
+              </button>
+            </div>
+
             {data.content.map((line, lineIndex) => (
               <div key={lineIndex} className="editor-line">
                 {line.map(([char, py], charIndex) => (
