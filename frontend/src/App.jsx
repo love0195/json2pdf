@@ -5,6 +5,8 @@ function App() {
   const [docs, setDocs] = useState([])
   const [currentDoc, setCurrentDoc] = useState(null)
   const [view, setView] = useState('list')
+  const [showImportModal, setShowImportModal] = useState(false)
+  const [pasteJson, setPasteJson] = useState('')
   const fileInputRef = useRef(null)
 
   useEffect(() => {
@@ -15,7 +17,7 @@ function App() {
       })
   }, [])
 
-  const importJson = (e) => {
+  const importFile = (e) => {
     const file = e.target.files[0]
     if (!file) return
 
@@ -23,30 +25,49 @@ function App() {
     reader.onload = (ev) => {
       try {
         const data = JSON.parse(ev.target.result)
-        if (!data.content || !Array.isArray(data.content)) {
-          alert('JSON格式错误')
-          return
-        }
-        const newDoc = {
-          id: Date.now().toString(),
-          title: data.title || file.name.replace('.json', ''),
-          content: data.content
-        }
-        fetch('/api/data/documents', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newDoc)
-        }).then(() => {
-          setDocs(prev => [...prev, newDoc])
-          setCurrentDoc(newDoc)
-          setView('preview')
-        })
+        addDoc(data, file.name.replace('.json', ''))
       } catch {
-        alert('解析失败')
+        alert('JSON格式错误')
       }
     }
     reader.readAsText(file)
     e.target.value = ''
+  }
+
+  const importPaste = () => {
+    if (!pasteJson.trim()) {
+      alert('请输入JSON内容')
+      return
+    }
+    try {
+      const data = JSON.parse(pasteJson)
+      addDoc(data, '粘贴文档')
+      setPasteJson('')
+      setShowImportModal(false)
+    } catch {
+      alert('JSON格式错误')
+    }
+  }
+
+  const addDoc = (data, defaultTitle) => {
+    if (!data.content || !Array.isArray(data.content)) {
+      alert('JSON格式错误，需要包含content数组')
+      return
+    }
+    const newDoc = {
+      id: Date.now().toString(),
+      title: data.title || defaultTitle,
+      content: data.content
+    }
+    fetch('/api/data/documents', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newDoc)
+    }).then(() => {
+      setDocs(prev => [...prev, newDoc])
+      setCurrentDoc(newDoc)
+      setView('preview')
+    })
   }
 
   const deleteDoc = (id, e) => {
@@ -63,10 +84,11 @@ function App() {
       <div className="app">
         <header className="header">
           <h1>拼音文档</h1>
-          <button className="import-btn" onClick={() => fileInputRef.current.click()}>
-            + 导入
-          </button>
-          <input type="file" ref={fileInputRef} accept=".json" onChange={importJson} hidden />
+          <div className="header-actions">
+            <button className="import-btn" onClick={() => setShowImportModal(true)}>
+              + 导入
+            </button>
+          </div>
         </header>
 
         <main className="doc-list">
@@ -87,6 +109,36 @@ function App() {
             ))
           )}
         </main>
+
+        {showImportModal && (
+          <div className="modal-overlay" onClick={() => setShowImportModal(false)}>
+            <div className="modal" onClick={e => e.stopPropagation()}>
+              <h2>导入文档</h2>
+              
+              <div className="import-options">
+                <button className="option-btn" onClick={() => fileInputRef.current.click()}>
+                  📁 上传JSON文件
+                </button>
+                <input type="file" ref={fileInputRef} accept=".json" onChange={importFile} hidden />
+                
+                <div className="divider">或</div>
+                
+                <textarea
+                  className="paste-input"
+                  placeholder="粘贴JSON内容..."
+                  value={pasteJson}
+                  onChange={(e) => setPasteJson(e.target.value)}
+                  rows={10}
+                />
+                <button className="paste-btn" onClick={importPaste}>
+                  确认导入
+                </button>
+              </div>
+              
+              <button className="close-btn" onClick={() => setShowImportModal(false)}>关闭</button>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -100,16 +152,18 @@ function App() {
       </header>
 
       <main className="preview-area">
-        {currentDoc.content.map((line, i) => (
-          <div key={i} className="print-line">
-            {line.map(([c, p], j) => (
-              <span key={j} className="print-char">
-                <span className="py">{p}</span>
-                <span className="hz">{c}</span>
-              </span>
-            ))}
-          </div>
-        ))}
+        <div className="preview-content">
+          {currentDoc.content.map((line, i) => (
+            <div key={i} className="print-line">
+              {line.map(([c, p], j) => (
+                <span key={j} className="print-char">
+                  <span className="py">{p}</span>
+                  <span className="hz">{c}</span>
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
       </main>
     </div>
   )
