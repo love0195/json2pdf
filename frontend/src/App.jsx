@@ -180,7 +180,6 @@ function App() {
       </nav>
 
       <div className="print-only">
-        <div className="print-title">{data.title}</div>
         <div className="print-body">
           {data.content.map((line, lineIndex) => (
             <div key={lineIndex} className="print-line">
