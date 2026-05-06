@@ -152,6 +152,10 @@ body {
   font-weight: bold;
 }
 
+.doc-title-line {
+  display: block;
+}
+
 .print-line {
   text-align: center;
   margin: 8px 0;
