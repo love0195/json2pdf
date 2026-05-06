@@ -133,8 +133,8 @@ function App() {
             <div className="empty">暂无文档，点击右上角导入</div>
           ) : (
             docs.map(doc => (
-              <div key={doc.id} className="doc-card" onClick={() => { setCurrentDoc(doc); setView('preview'); }}>
-                <div className="doc-info">
+              <div key={doc.id} className="doc-card">
+                <div className="doc-info" onClick={() => { setCurrentDoc(doc); setView('preview'); }}>
                   <h3>{doc.title}</h3>
                   <span>{doc.content.length}行</span>
                 </div>

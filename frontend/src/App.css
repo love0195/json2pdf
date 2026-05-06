@@ -70,45 +70,55 @@ body {
 .doc-card {
   background: white;
   border-radius: 12px;
-  padding: 16px;
+  padding: 12px 16px;
   margin-bottom: 12px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .doc-info {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #eee;
+  gap: 8px;
+  flex: 1;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.doc-info:hover {
+  opacity: 0.7;
 }
 
 .doc-info h3 {
   font-size: 16px;
   color: #333;
+  margin: 0;
 }
 
 .doc-info span {
   font-size: 13px;
   color: #999;
+  white-space: nowrap;
 }
 
 .doc-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .doc-actions button {
-  flex: 1;
-  padding: 10px;
+  padding: 8px 16px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   background: #f0f0f0;
   color: #333;
+  white-space: nowrap;
 }
 
 .doc-actions button:hover {

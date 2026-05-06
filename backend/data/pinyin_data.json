@@ -1480,7 +1480,7 @@
     }
   ],
   "settings": {
-    "fontSize": 17,
-    "pyFontSize": 12
+    "fontSize": 32,
+    "pyFontSize": 14
   }
 }
