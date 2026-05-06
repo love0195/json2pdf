@@ -36,37 +36,39 @@ echo ""
 echo "📦 检查Python依赖..."
 cd "$BACKEND_DIR"
 
-if [ ! -f "requirements.txt" ]; then
-    echo "⚠️  警告: 未找到requirements.txt"
-else
+if [ -f "requirements.txt" ]; then
     echo "📦 安装依赖..."
     $PYTHON_CMD -m pip install -q -r requirements.txt
 fi
 
-# 检查是否需要构建前端
+# 检查NodeJS并尝试构建前端（如果已安装）
 echo ""
 echo "🔍 检查前端..."
 cd "$SCRIPT_DIR"
 
-# 检查是否需要重新构建前端
-if [ ! -d "backend/static" ] || [ -z "$(ls -A backend/static 2>/dev/null)" ]; then
-    echo "🔨 前端未构建，正在构建..."
-    
-    if [ ! -d "frontend/node_modules" ]; then
-        echo "📦 安装前端依赖..."
-        cd "$FRONTEND_DIR"
-        npm install
-    fi
-    
-    cd "$FRONTEND_DIR"
-    npm run build
-    echo "✅ 前端构建完成"
+# 检查是否有已经构建好的静态文件
+if [ -d "backend/static" ] && [ -n "$(ls -A backend/static 2>/dev/null)" ]; then
+    echo "✅ 前端已就绪，跳过构建"
 else
-    echo "✅ 前端已就绪"
+    # 检查NodeJS
+    if command -v node &> /dev/null && command -v npm &> /dev/null; then
+        echo "🔨 检测到NodeJS，正在构建前端..."
+        cd "$FRONTEND_DIR"
+        
+        if [ ! -d "node_modules" ]; then
+            echo "📦 安装前端依赖..."
+            npm install
+        fi
+        
+        npm run build
+        echo "✅ 前端构建完成"
+    else
+        echo "⚠️  未检测到NodeJS，但已有预构建的静态文件，跳过前端构建"
+    fi
 fi
 
 # 确保数据目录存在
-mkdir -p "$BACKEND_DIR/data"
+mkdir -p "$SCRIPT_DIR/data"
 
 echo ""
 echo "🚀 启动服务..."
@@ -79,11 +81,4 @@ echo "========================================="
 echo ""
 
 cd "$BACKEND_DIR"
-
-# 启动服务
-if [ "$1" = "--no-build" ]; then
-    echo "跳过构建检查，直接启动"
-    $PYTHON_CMD app.py
-else
-    $PYTHON_CMD app.py
-fi
+$PYTHON_CMD app.py
