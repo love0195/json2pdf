@@ -6,16 +6,29 @@ function App() {
   const [currentDoc, setCurrentDoc] = useState(null)
   const [view, setView] = useState('list')
   const [showImportModal, setShowImportModal] = useState(false)
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [pasteJson, setPasteJson] = useState('')
+  const [settings, setSettings] = useState({ fontSize: 20, pyFontSize: 12 })
   const fileInputRef = useRef(null)
 
   useEffect(() => {
-    fetch('/api/data/documents')
-      .then(r => r.json())
-      .then(d => {
-        setDocs(Array.isArray(d) ? d : [])
-      })
+    Promise.all([
+      fetch('/api/data/documents').then(r => r.json()),
+      fetch('/api/data/settings').then(r => r.json())
+    ]).then(([docsData, settingsData]) => {
+      setDocs(Array.isArray(docsData) ? docsData : [])
+      setSettings(settingsData)
+    })
   }, [])
+
+  const saveSettings = (newSettings) => {
+    setSettings(newSettings)
+    fetch('/api/data/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newSettings)
+    })
+  }
 
   const importFile = (e) => {
     const file = e.target.files[0]
@@ -77,7 +90,28 @@ function App() {
       .then(() => setDocs(prev => prev.filter(d => d.id !== id)))
   }
 
-  const exportPdf = () => window.print()
+  const exportPdf = () => {
+    const style = document.createElement('style')
+    style.id = 'print-style-temp'
+    style.textContent = `
+      @media print {
+        .py {
+          font-size: ${settings.pyFontSize}pt !important;
+        }
+        .hz {
+          font-size: ${settings.fontSize}pt !important;
+        }
+      }
+    `
+    document.head.appendChild(style)
+    
+    window.print()
+    
+    setTimeout(() => {
+      const s = document.getElementById('print-style-temp')
+      if (s) s.remove()
+    }, 1000)
+  }
 
   if (view === 'list' || !currentDoc) {
     return (
@@ -85,6 +119,9 @@ function App() {
         <header className="header">
           <h1>拼音文档</h1>
           <div className="header-actions">
+            <button className="settings-btn" onClick={() => setShowSettingsModal(true)}>
+              ⚙️
+            </button>
             <button className="import-btn" onClick={() => setShowImportModal(true)}>
               + 导入
             </button>
@@ -139,6 +176,38 @@ function App() {
             </div>
           </div>
         )}
+
+        {showSettingsModal && (
+          <div className="modal-overlay" onClick={() => setShowSettingsModal(false)}>
+            <div className="modal" onClick={e => e.stopPropagation()}>
+              <h2>打印设置</h2>
+              
+              <div className="settings-group">
+                <label>汉字大小: {settings.fontSize}pt</label>
+                <input
+                  type="range"
+                  min="12"
+                  max="36"
+                  value={settings.fontSize}
+                  onChange={(e) => saveSettings({ ...settings, fontSize: parseInt(e.target.value) })}
+                />
+              </div>
+              
+              <div className="settings-group">
+                <label>拼音大小: {settings.pyFontSize}pt</label>
+                <input
+                  type="range"
+                  min="8"
+                  max="24"
+                  value={settings.pyFontSize}
+                  onChange={(e) => saveSettings({ ...settings, pyFontSize: parseInt(e.target.value) })}
+                />
+              </div>
+              
+              <button className="close-btn" onClick={() => setShowSettingsModal(false)}>关闭</button>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -148,7 +217,10 @@ function App() {
       <header className="header">
         <button className="back-btn" onClick={() => setView('list')}>←</button>
         <h1>{currentDoc.title}</h1>
-        <button className="export-btn" onClick={exportPdf}>PDF</button>
+        <div className="header-actions">
+          <button className="settings-btn" onClick={() => setShowSettingsModal(true)}>⚙️</button>
+          <button className="export-btn" onClick={exportPdf}>PDF</button>
+        </div>
       </header>
 
       <main className="preview-area">
@@ -157,14 +229,46 @@ function App() {
             <div key={i} className="print-line">
               {line.map(([c, p], j) => (
                 <span key={j} className="print-char">
-                  <span className="py">{p}</span>
-                  <span className="hz">{c}</span>
+                  <span className="py" style={{ fontSize: `${settings.pyFontSize}px` }}>{p}</span>
+                  <span className="hz" style={{ fontSize: `${settings.fontSize}px` }}>{c}</span>
                 </span>
               ))}
             </div>
           ))}
         </div>
       </main>
+
+      {showSettingsModal && (
+        <div className="modal-overlay" onClick={() => setShowSettingsModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h2>打印设置</h2>
+            
+            <div className="settings-group">
+              <label>汉字大小: {settings.fontSize}pt</label>
+              <input
+                type="range"
+                min="12"
+                max="36"
+                value={settings.fontSize}
+                onChange={(e) => saveSettings({ ...settings, fontSize: parseInt(e.target.value) })}
+              />
+            </div>
+            
+            <div className="settings-group">
+              <label>拼音大小: {settings.pyFontSize}pt</label>
+              <input
+                type="range"
+                min="8"
+                max="24"
+                value={settings.pyFontSize}
+                onChange={(e) => saveSettings({ ...settings, pyFontSize: parseInt(e.target.value) })}
+              />
+            </div>
+            
+            <button className="close-btn" onClick={() => setShowSettingsModal(false)}>关闭</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

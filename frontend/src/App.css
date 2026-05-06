@@ -46,6 +46,16 @@ body {
   background: rgba(255,255,255,0.3);
 }
 
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-btn {
+  font-size: 18px !important;
+  padding: 6px 10px !important;
+}
+
 .doc-list {
   padding: 20px;
 }
@@ -263,9 +273,24 @@ body {
   background: #eee;
 }
 
+.settings-group {
+  margin-bottom: 20px;
+}
+
+.settings-group label {
+  display: block;
+  color: #333;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.settings-group input[type="range"] {
+  width: 100%;
+}
+
 @media print {
   @page {
-    margin: 0;
+    margin: 15mm 10mm 10mm 10mm;
   }
 
   html, body {
@@ -283,7 +308,7 @@ body {
   }
 
   .preview-area {
-    padding: 10mm !important;
+    padding: 0 !important;
   }
 
   .preview-content {
@@ -299,13 +324,5 @@ body {
 
   .print-char {
     margin: 0 4px !important;
-  }
-
-  .py {
-    font-size: 12pt !important;
-  }
-
-  .hz {
-    font-size: 20pt !important;
   }
 }

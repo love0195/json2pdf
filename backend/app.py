@@ -12,7 +12,7 @@ def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
-    return {"documents": []}
+    return {"documents": [], "settings": {"fontSize": 20, "pyFontSize": 12}}
 
 def save_data(data):
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
@@ -22,6 +22,19 @@ def save_data(data):
 def get_data():
     data = load_data()
     return jsonify(data)
+
+@app.route('/api/data/settings', methods=['GET'])
+def get_settings():
+    data = load_data()
+    return jsonify(data.get('settings', {"fontSize": 20, "pyFontSize": 12}))
+
+@app.route('/api/data/settings', methods=['PUT'])
+def update_settings():
+    settings = request.get_json()
+    data = load_data()
+    data['settings'] = settings
+    save_data(data)
+    return jsonify({"status": "success", "settings": settings})
 
 @app.route('/api/data/documents', methods=['GET'])
 def get_documents():
