@@ -1478,5 +1478,9 @@
         ]
       ]
     }
-  ]
+  ],
+  "settings": {
+    "fontSize": 17,
+    "pyFontSize": 12
+  }
 }
